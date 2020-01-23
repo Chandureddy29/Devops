@@ -1,0 +1,256 @@
+Date: 27-11-2019
+JENKINS
+- Jenkins is popular open source Devops automation tool.
+- It is written I java. Java is dependency to run Jenkins.
+- Jenkins all stated with continuous integration (CI).
+- Jenkins supports two types of jobs.
+1. Freestyle
+2. Pipeline (Most important)
+a. Scripted Pipeline
+b. Declarative Pipeline
+- you can extend the features of Jenkins by installing plugins.
+- Cloud bees is enterprise version of Jenkins. 
+- Other competitive tools for Jenkins.
+1. Go CD
+2. Bamboo
+3. Circle CI
+4. Cruise control
+5. TFS – Team foundation server
+6. Gitlab
+7. Github – recently release github actions that has CI/CD built-in
+8. Solano
+Installing Jenkins on Linux
+- Java is a dependency, so install jvm, nd we are going to build java projects 
+- Launch  AWS linux instance.
+$ sudo yum list | grep java-1.8.0
+Pick a package name that contains Devel as a name
+$ sudo install package name.
+
+Goto Jenkins.io
+Follow steps https://pkg.jenkins.io/redhat-stable/
+$ sudo yum list | grep Jenkins
+$ sudo wget -o/etc/yum-------<webpath>
+$ sudo rpm
+
+$ sudo yum list | grep Jenkins
+$ sudo yum install Jenkins
+$ sudo service start/stop/status Jenkins
+$ sudo chkconfig Jenkins on (autostart)
+Accessing Jenkins from web browser using 8080 port
+$ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+We need to unlock the Jenkins 
+Paste the path in Jenkins on linux
+Select install suggested plugins
+$ sudo yum install git -y
+Configure username and password
+Hello-world Jenkins job
+
+Example: - 
+Take code from git and build it using maven
+
+We can install s/w on Jenkins using manage Jenkins global tool configuration. This option is recommend option
+Example: 3
+Extend pervious example and deploy it on a TOMCAT
+
+
+
+Date: 28-11-2019
+Deployment of Jenkins into TOMCAT
+
+
+
+- We have to take a war file from Jenkins and deploy that on to TOMCAT.
+- We want to establish password less communication from Jenkins to TOMCAT.
+Steps for password less communication
+1. We need to SSH into Jenkins
+$ sudo su -s /bin/bash Jenkins (to jump into Jenkins)
+$ ssh-keygen (to generate password)
+/var/lib/jenkins/ (Jenkins home folder)
+$ cat .ssh/id_rsa.pub (to get password)
+Reference: 7am-web-2019-oct
+Date: 29-11-2019
+
+Q. what is Jenkins default installation location?
+A. /var/lib/Jenkins
+$ ls jobs (to check the jobs in Jenkins)
+$ ls jobs/tomcat\ci-cd
+
+
+Discarding old build?
+It is job level configuration. 
+Steps:
+Open job configuration-general-discard old build
+
+
+Build Triggers
+By default, we have to manually triggers this. Jenkins have provision to automate to build triggers.
+Build periodically
+Provides a cron-like feature to periodically execute this project.
+This feature is primarily for using Jenkins as a cron replacement, and it is not ideal for continuously building software projects. When people first start continuous integration, they are often so used to the idea of regularly scheduled builds like nightly/weekly that they use this feature. However, the point of continuous integration is to start a build as soon as a change is made, to provide a quick feedback to the change. To do that you need to hook up SCM change notification to Jenkins.
+
+So, before using this feature, stop and ask yourself if this is really what you want.
+Build periodically has drawbacks
+- It will build even there are no changes in SCM. It causes performance issues in Jenkins.
+Poll SCM:
+It is an enhanced version of build periodically.
+This triggers the job according to cron expression if and only if there are new changes in SCM.
+
+Q. How poll SCM knows there are new commits in SCM?
+A. It maintaining Git polling log. Previously commit ID stored in Jenkins server in git polling log file, this commit ID is compared with latest commit ID in remote SCM.
+Even though the job is not triggered when there are no changes Jenkins keeps checking SCM for latest commits, this can cause performance issue. 
+GitHub web hooks: 
+- In this approach Jenkins will not have an overhead for checking new changes in SCM.
+- In GitHub we create a web hook by putting Jenkins URL such that when there are new commits GitHub will trigger Jenkins job.
+Configuring GitHub web hook
+Go to GitHub repository—settings—webhooks—add webhook—give Jenkins payload URL
+
+To trigger Jenkins job for web hooks we need to enable GitHub webhook trigger for GITScm polling.
+Note: 
+- GitHub release a new feature ‘GitHub actions’ using which we can build CI-CD pipelines like we do in Jenkins.
+- It is very advanced and has integrations with cloud.
+- Previously Git lab has similar functionality.
+Build Java project using Maven through GitHub actions.
+
+Date: 02-12-2019
+How to secure Jenkins?
+Go to manage Jenkins--> configure global security--> enable security
+
+- By default, security is enabled for Jenkins i.e. only users with username and password can access the Jenkins.
+- We will have one initially admin user at the time of installing and configuring of Jenkins.
+- We can add new users to Jenkins.
+- By default, any logged in user is admin. If we create new user, that users will be a admin by default.
+- By default, Jenkins stores user names and password on its hard disc.
+- Jenkins can be federated with LDAP with Microsoft directory etc., such that users having credentials in LDAP/AD can login to Jenkins.
+Q. What is matrix-based security?
+A. It is security feature in Jenkins using which we can configure granular permission to Jenkins user.
+Go to--> manage user--> create a user.
+To give the matrix-based security
+Go to--> configure security-->matrix-based security-->give permission according to the users.
+Q. What is project-based matrix authorization strategy?
+A. This option gives as to configure job level permissions to the users. 
+If we want to give permission to user at job level?
+Go to-->jobs-->configure-->project-based matrix authorization security.
+Email notifications:
+In DevOps we want to send automatic feedback to user, if any jobs fail using email?
+We have to configure SMTP server details in Jenkins using which Jenkins send emails.
+Go to-->manage Jenkins-->configure system-->email notification
+Give SMTP server name and click advanced use SMTP authentication--> user name should be company’s ID and password--> click use SSL (it encrypts the email) --> SMTP port-->Test configuration by sending test e-mail (give recipient email ID)
+
+Jenkins master slave configuration:
+We can create Jenkins cluster by grouping multiple servers such that Jenkins can handle more load by distributing jobs across multiple servers.
+
+
+
+Launch a VM for joining it as a Jenkins slave.
+Create an instance same as Jenkins called slave-1
+Go to Jenkins-->manage Jenkins--> manage node-->new node-->give node-->permanent agent.
+
+
+
+
+
+Q. How to run Jenkins on a specific slave?
+A. Inside job configuration select restrict where this project can be run and put the label of a slave.
+Date: 03-12-2019
+Jenkins Pipeline
+- We write pipeline jobs using code. It is also refereed as pipeline as a code.
+- We use Groovy DSL (domain specific language)
+- We can directly use Groovy scripts inside pipeline.
+- Jenkins pipeline supports two different syntaxes 
+1. Declarative pipeline (new feature)
+2. Scripted pipeline
+Why we use a pipeline?
+Jenkins is, fundamentally, an automation engine which supports a number of automation patterns. Pipeline adds a powerful set of automation tools onto Jenkins, supporting use cases that span from simple continuous integration to comprehensive CD pipelines. By modelling a series of related tasks, users can take advantage of the many features of Pipeline:
+* Code: Pipelines are implemented in code and typically checked into source control, giving teams the ability to edit, review, and iterate upon their delivery pipeline.
+* Durable: Pipelines can survive both planned and unplanned restarts of the Jenkins master.
+* Pausable: Pipelines can optionally stop and wait for human input or approval before continuing the Pipeline run.
+* Versatile: Pipelines support complex real-world CD requirements, including the ability to fork/join, loop, and perform work in parallel.
+* Extensible: The Pipeline plugin supports custom extensions to its DSL [1] and multiple options for integration with other plugins.
+
+Example of scripted pipeline:
+
+Scripted pipeline contain node. (Node can be master or slave)
+
+
+
+Date: 04-12-2019
+Writing declarative pipeline?
+Declarative starts with pipeline and scripted is starts with node.
+Q. What is Jenkins file?
+A. Jenkins file contains Jenkins pipeline script. It is usually kept in project root directory.
+Declarative pipeline to build and deploy war into TOMCAT?
+
+
+SSH agent plugin: This plugin helps us to connect remote servers, we can run scripts on remote machine, we can copy files on remote machine.
+
+Example:
+
+Date: 05-12-19
+Q. What is upstream and downstream jobs in Jenkins.
+A. In Jenkins we can configure jobs with a dependency of another job.
+Job teo- depends on job-one (job one is upstream and job-two is downstream.
+Parameterized Jobs
+It supports both free style and pipeline.
+Jenkins global variables:
+Jenkins exposes build in variables as follows
+We can get it in Jenkins under global variable reference.
+
+Params: it is read only map which contains parameters passed through a job.
+Docker: It is a global variable we can perform operations related to docker.
+Env: It is a build in global variable.
+ It is a variable which contains job specific details  few Jenkins details as well.
+Current build:
+
+
+Date: 09-12-2019
+Sonar qube integrations:
+- It is tool for static code analysis. 
+- The input for this tool is source code. 
+- Your teammate for code quality and security.
+- Sonar can find out securities vulnerabilities.
+- It supports 25+ programming languages.
+- We can integrate in the part of CI/CD.
+Q. What is your typical CI/CD pipeline?
+1. Pipeline triggers with GIT push.
+2. It clones or pull latest commit.
+3. it builds and run sonar qube in parallel.
+4. It builds a tag for docker image or we push docker image to Nexus.
+5. We deploy the application from development to staging.
+6. Our jobs waits for an approval before it is deploy to production.
+7. once approved the code is deployed into product.
+8. We do have a separate Jenkins job for selenium testing which is maintaining by testing team.
+9. If any of the above stage fails it sends an email notification.
+Q. How many micro services have in a project?
+A. It’s our wish. We have to say minimum of 4 in interviews with their names.
+Date: 10-12-19
+- Sonar requires a DB for storing our static analysis.
+Set up sonar qube:
+Launch a instance as t2.medium
+Download the sonar by logging into sonar from AWS
+Sudo weget paste link 7.2
+Sudo unzip sonar
+Cd bin/
+Sudo  ../bin/linux-x86-64/sonar.sh start
+Sudo chown -R ec2user sonar7.2
+Sudo yum list | grep java 1.8.0
+Sudo install java 
+Cd ../bin/
+
+- Default port no. for sonar is 9000.
+- Sonar by default uses embedded DB. But for production we should use oracle posgresql
+Create a file vi /etc/init.d/sonar
+Reference https://docs.sonarqube.org/latest/setup/operate-server/
+Sudo service sonar stop
+Default username and password is admin and admin
+The movement we login sonar prompts for generating a token. This is authenticating for sonar.
+This token we used in Jenkins for publishing for source code. 
+In Jenkins install sonar plugin scanner.
+Using this plugin we can publish src to sonar.
+Go to Jenkins-->manage Jenkins-->update center-->install
+Manage Jenkins--> configure system--> sonarqube server--> add sonarqube--> name as sonar7--> URL as private IP.
+Keep the credentials .
+Webhook inside a sonar.
+
+
+
+
